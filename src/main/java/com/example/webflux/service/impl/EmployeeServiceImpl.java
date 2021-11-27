@@ -4,6 +4,7 @@ import com.example.webflux.dao.EmployeeRepository;
 import com.example.webflux.model.entity.Employee;
 import com.example.webflux.service.EmployeeService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -42,5 +43,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Mono<Void> deleteEmp(Integer id) {
         return employeeRepo.deleteById(id);
+    }
+
+
+    public Mono<Employee> updateEmpWitheException(Employee employee) {
+        int i = 1 / 0;
+        return employeeRepo.save(employee);
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> doStuffWithTransactional() {
+
+        Employee testInsert = new Employee(999, "test", "test");
+        return employeeRepo.save(testInsert)
+                .then(employeeRepo.findById(999))
+                .then();
+//                .flatMap(e -> {
+//                    e.setName("test2");
+//                    return updateEmpWitheException(e);
+//                });
     }
 }

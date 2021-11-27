@@ -1,10 +1,19 @@
 package com.example.webflux.config;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
+import org.springframework.data.mongodb.ReactiveMongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
@@ -13,22 +22,38 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
  */
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 @EnableReactiveMongoRepositories(basePackages = "com.example.webflux.dao")
 public class MongoDbConfig extends AbstractReactiveMongoConfiguration {
 
-    @Value("${mongo.connectionString}")
-    private String connectionString;
-    @Value("${mongo.database}")
-    private String database;
+    private final MongoProperties mongoProperties;
 
+    @Bean
     @Override
     public MongoClient reactiveMongoClient() {
-        log.info("connectionString: {}", connectionString);
-        return MongoClients.create(connectionString);
+
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(mongoProperties.getUri()))
+
+//                .credential(MongoCredential.createCredential(
+//                        mongoProperties.getUsername(), mongoProperties.getDatabase(), mongoProperties.getPassword()))
+                .retryWrites(true)
+                .readConcern(ReadConcern.MAJORITY)
+                .writeConcern(WriteConcern.MAJORITY)
+                .build();
+
+        return MongoClients.create(settings);
     }
 
     @Override
     protected String getDatabaseName() {
-        return database;
+        return mongoProperties.getDatabase();
+    }
+
+    @Bean
+    public ReactiveMongoTransactionManager reactiveMongoTransactionManager(
+            ReactiveMongoDatabaseFactory reactiveMongoDatabaseFactory
+    ) {
+        return new ReactiveMongoTransactionManager(reactiveMongoDatabaseFactory);
     }
 }

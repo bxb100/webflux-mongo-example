@@ -1,3 +1,7 @@
-mongo:
-  connectionString: mongodb://admin:admin@localhost:27017/
-  database: webflux
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:30011,localhost:30012,localhost:30013/webflux?replicaSet=vision-set
+      database: webflux
+#      username: webflux
+#      password: '123456'

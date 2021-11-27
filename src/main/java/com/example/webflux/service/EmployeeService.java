@@ -18,4 +18,6 @@ public interface EmployeeService {
     Mono<Employee> updateEmp(Employee employee);
 
     Mono<Void> deleteEmp(Integer id);
+
+    Mono<Void> doStuffWithTransactional();
 }

@@ -3,7 +3,6 @@ package com.example.webflux.controller;
 import com.example.webflux.model.entity.Employee;
 import com.example.webflux.service.EmployeeService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,5 +56,13 @@ public class EmployController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable("id") Integer id) {
         employeeService.deleteEmp(id).subscribe();
+    }
+
+    @PostMapping("/tx")
+    @ResponseStatus(HttpStatus.OK)
+    public void tx() {
+        employeeService.doStuffWithTransactional().subscribe();
+        // 事务结束
+        // int i = 1 / 0;
     }
 }
